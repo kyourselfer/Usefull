@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# PROVIDE: factory
+# REQUIRE: NETWORKING SERVERS DAEMON
+# BEFORE:  LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="autossh"
+forever="/usr/local/bin/autossh"
+workdir="/tmp"
+#script="index.js"
+
+rcvar=`set_rcvar`
+
+start_cmd="start"
+stop_cmd="stop"
+restart_cmd="restart"
+
+load_rc_config $name
+eval "${rcvar}=\${${rcvar}:-'NO'}"
+
+start()
+{
+  AUTOSSH_PIDFILE=/tmp/autossh.pid
+  AUTOSSH_LOGFILE=/tmp/autossh.log
+#  ${forever} start -a -l /var/log/forever.log -o /dev/null -e ${workdir}/logs/node_err.log --sourceDir ${workdir} ${workdir}/node/${script}
+  ${forever} -M 11055 -f -N -R 30050:127.0.0.1:10050 usercrt@212.96.106.184 -p 225 -i /home/usercrt/.ssh/id_rsa
+}
+
+stop()
+{
+  killall ${name}
+}
+
+restart()
+{
+  stop && start
+}
+
+run_rc_command "$1"
